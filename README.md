@@ -8,7 +8,7 @@
 
 ## 开发状态
 
-已从用户设备上的适配 APK 恢复显示器路由、零高度上屏占位、按下屏尺寸分配键盘与候选区、旋转重建、视图重新绑定和下屏字体调整。以实际显示器 ID 和状态选择键盘屏幕，尊重 Retroid 的固定键盘设置，不写死 RP Duo 的分辨率。实机验证记录会随验证结果更新；不承诺其他设备和固件已验证。
+已从用户设备上的适配 APK 恢复显示器路由、零高度上屏占位、按下屏尺寸分配键盘与候选区、旋转重建、视图重新绑定和下屏字体调整。以实际显示器 ID 和状态选择键盘屏幕，尊重 Retroid 的固定键盘设置，不写死 RP Duo 的分辨率。2026-10-22 已在 RP Duo（Android 16）完成上下屏中文输入、数字与密码输入、完成动作、下屏旋转及 5 次收起重开验证，详见 [本次实机验证记录](validation/rp-duo-2026-10-22-port/README.md)。不承诺其他设备和固件已验证。
 
 输入法“关于”页可离线阅读 [适配与兼容说明](app/src/main/assets/docs/rp-duo-compatibility.html)，其中区分了来源版本与当前 fork 的验证范围。
 
@@ -20,7 +20,7 @@
 ./gradlew :app:testDualscreenDebugUnitTest :app:assembleDualscreenDebug
 ```
 
-输出位于 `app/build/outputs/apk/dualscreen/debug/`。GitHub Actions 会运行布局计算单元测试、验证资源完整性、构建测试版和输入探针并上传 APK。无需语音模型、语音运行库或私有签名文件。
+输出位于 `app/build/outputs/apk/dualscreen/debug/`。GitHub Actions 会运行布局计算单元测试、验证资源完整性、构建测试版和输入探针并上传 APK。无需语音模型、语音运行库或私有签名文件。当前 CI 使用临时 debug 签名，不保证不同构建之间能覆盖安装；持续分发前需配置稳定签名，避免为更新而卸载用户数据。
 
 Rime 运行资源来源与完整性校验见 `resources/rime-manifest.json`；校验命令：
 
