@@ -14,6 +14,9 @@ class AboutFragment : PreferenceFragmentCompat() {
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         preferenceScreen = preferenceManager.createPreferenceScreen(requireContext()).apply {
+            addPreference(R.string.rp_duo_compatibility_notes, R.string.rp_duo_compatibility_notes_summary) {
+                findNavController().navigate(R.id.action_aboutFragment_to_compatibilityNotesFragment)
+            }
             addPreference(R.string.privacy_policy) {
                 findNavController().navigate(R.id.action_aboutFragment_to_privacyPolicyFragment)
             }

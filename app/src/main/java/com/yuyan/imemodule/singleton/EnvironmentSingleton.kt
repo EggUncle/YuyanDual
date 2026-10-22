@@ -3,8 +3,7 @@ package com.yuyan.imemodule.singleton
 import com.yuyan.imemodule.application.Launcher
 import com.yuyan.imemodule.data.theme.ThemeManager.prefs
 import com.yuyan.imemodule.prefs.AppPrefs
-import com.yuyan.imemodule.utils.DevicesUtils
-import kotlin.math.max
+import com.yuyan.imemodule.keyboard.KeyboardGeometry
 import kotlin.math.min
 import android.util.DisplayMetrics
 
@@ -50,7 +49,7 @@ class EnvironmentSingleton private constructor() {
     }
 
     fun initDataWithDisplayMetrics(dm: DisplayMetrics) {
-        lastDisplayMetrics = dm
+        lastDisplayMetrics = DisplayMetrics().apply { setTo(dm) }
         reinitWithDisplayMetrics(dm)
     }
 
@@ -62,20 +61,11 @@ class EnvironmentSingleton private constructor() {
         mScreenWidth = dm.widthPixels
         mScreenHeight = dm.heightPixels
         isLandscape = mScreenHeight <= mScreenWidth
-        val screenWidthVertical = min(dm.widthPixels, dm.heightPixels)
-        val screenHeightVertical = max(dm.widthPixels, dm.heightPixels)
-
-        // 键盘尺寸计算（不再考虑悬浮或单手占位）
-        inputAreaWidth = screenWidthVertical
+        inputAreaWidth = mScreenWidth
         holderWidth = 0
-        skbWidth = screenWidthVertical
+        skbWidth = inputAreaWidth
 
-        if(isLandscape){
-            inputAreaWidth = mScreenWidth
-            skbWidth = inputAreaWidth
-        }
-
-        // 根据显示状态选择独立的高度比例；全屏状态默认按候选区以下区域自动填充，当设置自定义比例 (>0) 时优先生效
+        // Fullscreen uses the lower screen's actual height, including room for candidates.
         val prefsInternal = AppPrefs.getInstance().internal
         val ratio = when (currentDisplayState) {
             DisplayState.PrimaryPortrait -> prefsInternal.heightRatioPrimaryPortrait.getValue()
@@ -83,27 +73,31 @@ class EnvironmentSingleton private constructor() {
             DisplayState.SecondaryLandscape -> prefsInternal.heightRatioSecondaryLandscape.getValue()
             DisplayState.SecondaryFullscreen -> {
                 val pref = prefsInternal.heightRatioSecondaryFullscreen.getValue()
-                if (pref > 0f) pref else 0.7f
+                if (pref <= 0f) 1f else pref
             }
         }
         keyboardHeightRatio = ratio
 
-        skbHeight = (screenHeightVertical * keyboardHeightRatio).toInt()
-
-        // 候选栏高度改为基于键盘高度计算，统一使用 0.1 比例
-        val candidatesHeightRatio = 0.1f
-        heightForcomposing = (skbHeight * candidatesHeightRatio *
-                AppPrefs.getInstance().keyboardSetting.candidateTextSize.getValue() / 100f).toInt()
-        heightForCandidates = (heightForcomposing * 1.9).toInt()
-        heightForCandidatesArea = (heightForcomposing * 2.9).toInt()
-        composingTextSize = DevicesUtils.px2sp (heightForcomposing)
-        candidateTextSize = DevicesUtils.px2sp (heightForCandidates)
+        val geometry = KeyboardGeometry.calculate(
+            displayHeight = mScreenHeight,
+            heightRatio = keyboardHeightRatio,
+            candidateScale = AppPrefs.getInstance().keyboardSetting.candidateTextSize.getValue() / 100f,
+            reservedBottom = keyboardBottomPaddingPx + systemNavbarWindowsBottom,
+            fullscreen = currentDisplayState == DisplayState.SecondaryFullscreen,
+        )
+        skbHeight = geometry.keys
+        heightForcomposing = geometry.composing
+        heightForCandidates = geometry.candidates
+        heightForCandidatesArea = geometry.candidateArea
+        val scaledDensity = dm.scaledDensity.coerceAtLeast(0.1f)
+        composingTextSize = heightForcomposing * 0.7f / scaledDensity
+        candidateTextSize = heightForCandidates * 0.7f / scaledDensity
         heightForFullDisplayBar = 0
         heightForKeyboardMove = 0
 
         val keyboardFontSizeRatio = prefs.keyboardFontSize.getValue()/100f
-        keyTextSize = (skbHeight * 0.06f * keyboardFontSizeRatio).toInt()
-        keyTextSmallSize = (skbHeight * 0.04f * keyboardFontSizeRatio).toInt()
+        keyTextSize = (min(skbHeight * 0.06f, skbWidth * 0.045f) * keyboardFontSizeRatio).toInt()
+        keyTextSmallSize = (min(skbHeight * 0.04f, skbWidth * 0.03f) * keyboardFontSizeRatio).toInt()
         keyXMargin = (prefs.keyXMargin.getValue() / 1000f * skbWidth).toInt()
         keyYMargin = (prefs.keyYMargin.getValue() / 1000f * skbHeight).toInt()
         inputAreaHeight = skbHeight + heightForCandidatesArea
@@ -112,13 +106,13 @@ class EnvironmentSingleton private constructor() {
     var keyBoardHeightRatio: Float
         get() = keyboardHeightRatio
         set(keyBoardHeightRatio) {
-            keyboardHeightRatio = keyBoardHeightRatio
+            keyboardHeightRatio = if (keyBoardHeightRatio.isFinite()) keyBoardHeightRatio.coerceIn(0.1f, 1f) else 0.5f
             val internal = AppPrefs.getInstance().internal
             when (currentDisplayState) {
-                DisplayState.PrimaryPortrait -> internal.heightRatioPrimaryPortrait.setValue(keyBoardHeightRatio)
-                DisplayState.SecondaryPortrait -> internal.heightRatioSecondaryPortrait.setValue(keyBoardHeightRatio)
-                DisplayState.SecondaryLandscape -> internal.heightRatioSecondaryLandscape.setValue(keyBoardHeightRatio)
-                DisplayState.SecondaryFullscreen -> internal.heightRatioSecondaryFullscreen.setValue(keyBoardHeightRatio)
+                DisplayState.PrimaryPortrait -> internal.heightRatioPrimaryPortrait.setValue(keyboardHeightRatio)
+                DisplayState.SecondaryPortrait -> internal.heightRatioSecondaryPortrait.setValue(keyboardHeightRatio)
+                DisplayState.SecondaryLandscape -> internal.heightRatioSecondaryLandscape.setValue(keyboardHeightRatio)
+                DisplayState.SecondaryFullscreen -> internal.heightRatioSecondaryFullscreen.setValue(keyboardHeightRatio)
             }
         }
 
@@ -127,8 +121,20 @@ class EnvironmentSingleton private constructor() {
             field = isFloatMode
         }
 
+    val keyboardBottomPaddingPx: Int
+        get() {
+            val internal = AppPrefs.getInstance().internal
+            val value = when (currentDisplayState) {
+                DisplayState.PrimaryPortrait -> internal.bottomPaddingPrimaryPortrait.getValue()
+                DisplayState.SecondaryPortrait -> internal.bottomPaddingSecondaryPortrait.getValue()
+                DisplayState.SecondaryLandscape -> internal.bottomPaddingSecondaryLandscape.getValue()
+                DisplayState.SecondaryFullscreen -> internal.bottomPaddingSecondaryFullscreen.getValue()
+            }
+            return value.coerceIn(0, mScreenHeight.coerceAtLeast(0) / 4)
+        }
+
     val skbAreaHeight:Int
-        get() = instance.inputAreaHeight + AppPrefs.getInstance().internal.keyboardBottomPadding.getValue() + instance.systemNavbarWindowsBottom
+        get() = inputAreaHeight + keyboardBottomPaddingPx + systemNavbarWindowsBottom
 
     val leftMarginWidth:Int
         get() = (instance.inputAreaWidth - instance.skbWidth)/2

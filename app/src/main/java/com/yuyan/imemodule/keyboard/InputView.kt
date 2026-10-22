@@ -2,16 +2,12 @@ package com.yuyan.imemodule.keyboard
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
-import android.os.Build
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowInsets
-import android.view.WindowInsetsController
 import android.view.inputmethod.EditorInfo
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -20,7 +16,6 @@ import android.widget.RelativeLayout
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.graphics.scale
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.get
 import androidx.core.view.postDelayed
@@ -91,7 +86,7 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
     var hasSelectionAll = false   // 编辑键盘选择模式
 
     init {
-        initNavbarBackground(service)
+        initWindowInsets()
         this.service = service
         mSkbRoot = LayoutInflater.from(context).inflate(R.layout.sdk_skb_container, this, false) as RelativeLayout
         addView(mSkbRoot)
@@ -112,6 +107,12 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
             addRule(ALIGN_LEFT, mSkbRoot.id)
         })
         initView(context)
+        DecodingInfo.candidatesLiveData.observe(this) { _ ->
+            if (KeyboardManager.instance.isBoundTo(this)) {
+                updateCandidateBar()
+                (KeyboardManager.instance.currentContainer as? CandidatesContainer)?.showCandidatesView()
+            }
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -158,7 +159,7 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
                 EnvironmentSingleton.DisplayState.SecondaryLandscape -> prefsInternal.rightPaddingSecondaryLandscape
                 EnvironmentSingleton.DisplayState.SecondaryFullscreen -> prefsInternal.rightPaddingSecondaryFullscreen
             }
-            bottomPadding = mBottomPaddingKey.getValue()
+            bottomPadding = EnvironmentSingleton.instance.keyboardBottomPaddingPx
             rightPadding = mRightPaddingKey.getValue()
             mSkbRoot.bottomPadding = 0
             mSkbRoot.rightPadding = 0
@@ -187,13 +188,9 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
                 EnvironmentSingleton.DisplayState.SecondaryLandscape -> prefsInternal.rightPaddingSecondaryLandscape
                 EnvironmentSingleton.DisplayState.SecondaryFullscreen -> prefsInternal.rightPaddingSecondaryFullscreen
             }
-            mSkbRoot.bottomPadding = mBottomPaddingKey.getValue()
+            mSkbRoot.bottomPadding = EnvironmentSingleton.instance.keyboardBottomPaddingPx
             mSkbRoot.rightPadding = mRightPaddingKey.getValue()
             updateTheme()
-            DecodingInfo.candidatesLiveData.observe( this){ _ ->
-                updateCandidateBar()
-                (KeyboardManager.instance.currentContainer as? CandidatesContainer)?.showCandidatesView()
-            }
         }
     }
 
@@ -741,31 +738,36 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
         }
     }
 
-    private fun initNavbarBackground(service: ImeService) {
-        // 无条件调整系统栏位：禁用 decorFits 并隐藏导航栏，确保键盘拥有稳定的底部空间
-        service.window.window!!.also {
-            WindowCompat.setDecorFitsSystemWindows(it, false)
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R){
-                @Suppress("DEPRECATION")
-                it.navigationBarColor = Color.TRANSPARENT
-            } else {
-                it.insetsController?.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-                it.insetsController?.hide(WindowInsets.Type.navigationBars())
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) it.isNavigationBarContrastEnforced = false
-        }
+    private fun initWindowInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
-            EnvironmentSingleton.instance.systemNavbarWindowsBottom = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
-            val fullDisplayKeyboardEnable = getInstance().internal.fullDisplayKeyboardEnable.getValue()
-            mLlKeyboardBottomHolder.minimumHeight = if(EnvironmentSingleton.instance.keyboardModeFloat)  0
-            else if(fullDisplayKeyboardEnable) EnvironmentSingleton.instance.heightForFullDisplayBar + EnvironmentSingleton.instance.systemNavbarWindowsBottom
-            else  EnvironmentSingleton.instance.systemNavbarWindowsBottom
+            if (KeyboardManager.instance.isBoundTo(this)) {
+                val bottom = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+                val environment = EnvironmentSingleton.instance
+                val changed = environment.systemNavbarWindowsBottom != bottom
+                environment.systemNavbarWindowsBottom = bottom
+                mLlKeyboardBottomHolder.minimumHeight = if (environment.keyboardModeFloat) 0 else bottom
+                if (changed) {
+                    environment.initData()
+                    post {
+                        if (isAttachedToWindow && KeyboardManager.instance.isBoundTo(this)) {
+                            KeyboardManager.instance.refreshWindowLayout()
+                            requestLayout()
+                        }
+                    }
+                }
+            }
             insets
         }
     }
 
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        ViewCompat.requestApplyInsets(this)
+    }
+
     @SuppressLint("SimpleDateFormat")
     fun onStartInputView(editorInfo: EditorInfo, restarting: Boolean) {
+        KeyboardManager.instance.setData(mSkbRoot.findViewById(R.id.skb_input_keyboard_view), this)
         InputModeSwitcherManager.requestInputWithSkb(editorInfo)
         KeyboardManager.instance.switchKeyboard()
         resetToIdleState()

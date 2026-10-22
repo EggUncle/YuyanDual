@@ -25,8 +25,8 @@ jobs:
         run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
       - name: Verify runtime resources
         run: python3 scripts/verify_resources.py
-      - name: Build debug APK
-        run: ./gradlew --no-daemon :app:assembleDualscreenDebug
+      - name: Test geometry and build APKs
+        run: ./gradlew --no-daemon :app:testDualscreenDebugUnitTest :app:assembleDualscreenDebug :imeprobe:assembleDebug
       - name: Verify packaged dictionaries and microphone permission
         run: |
           python3 scripts/verify_resources.py app/build/outputs/apk/dualscreen/debug/*.apk
@@ -36,5 +36,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: yuyan-rp-duo-debug
-          path: app/build/outputs/apk/dualscreen/debug/*.apk
+          path: |
+            app/build/outputs/apk/dualscreen/debug/*.apk
+            validation/probe/build/outputs/apk/debug/*.apk
           if-no-files-found: error

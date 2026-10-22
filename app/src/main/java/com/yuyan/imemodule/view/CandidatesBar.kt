@@ -137,7 +137,7 @@ class CandidatesBar(context: Context?, attrs: AttributeSet?) : RelativeLayout(co
             candidatesData.addView(mRVCandidates, LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, candidatesHeight, 1f))
             candidatesData.addView(mRightArrowBtn)
         }
-        mComposingView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, instance.composingTextSize)
+        mComposingView.setTextSize(TypedValue.COMPLEX_UNIT_SP, instance.composingTextSize)
         mCandidatesAdapter.notifyChanged()
     }
 

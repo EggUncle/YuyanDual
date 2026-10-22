@@ -226,4 +226,6 @@
     <string name="setting_dual_screen">双屏</string>
     <string name="dual_force_fullscreen_primary">主屏激活时强制全屏</string>
 
+    <string name="rp_duo_compatibility_notes">RP Duo 适配与兼容说明</string>
+    <string name="rp_duo_compatibility_notes_summary">离线文档：双屏逻辑、布局、引擎兼容和验证范围</string>
 </resources>

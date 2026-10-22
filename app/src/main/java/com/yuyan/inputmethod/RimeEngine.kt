@@ -1,6 +1,10 @@
 package com.yuyan.inputmethod
 
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.view.KeyEvent
+import android.widget.Toast
 import com.yuyan.imemodule.application.CustomConstant
 import com.yuyan.imemodule.application.Launcher
 import com.yuyan.imemodule.manager.InputModeSwitcherManager
@@ -15,8 +19,10 @@ import com.yuyan.inputmethod.util.LX17PinYinUtils
 import com.yuyan.inputmethod.util.QwertyPinYinUtils
 import com.yuyan.inputmethod.util.T9PinYinUtils
 import java.util.Locale
+import java.util.concurrent.atomic.AtomicBoolean
 
 object RimeEngine {
+    private val initializationErrorReported = AtomicBoolean(false)
     private val keyRecordStack = KeyRecordStack()
     private var pinyins: Array<String> = emptyArray() // 候选词界面的候选拼音列表
     var showCandidates: List<CandidateListItem> = emptyList() // 所有待展示的候选词
@@ -30,7 +36,21 @@ object RimeEngine {
     fun selectSchema(mod: String): Boolean {
         keyRecordStack.clear()
         Rime.startup(Launcher.instance.context, false)
-        return Rime.selectSchema(mod)
+        val selected = Rime.selectSchema(mod)
+        if (!selected &&
+            AppPrefs.getInstance().internal.dataDictVersion.getValue() >= CustomConstant.CURRENT_RIME_DICT_DATA_VERSIOM &&
+            initializationErrorReported.compareAndSet(false, true)
+        ) {
+            Log.e("YuyanRime", "Input engine initialization failed after dictionary deployment")
+            Handler(Looper.getMainLooper()).post {
+                Toast.makeText(
+                    Launcher.instance.context,
+                    "输入引擎未能初始化，请使用兼容安装包或检查词库资源。",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+        return selected
     }
 
     fun getCurrentRimeSchema(): String {

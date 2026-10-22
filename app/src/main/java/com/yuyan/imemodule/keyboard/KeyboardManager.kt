@@ -1,6 +1,5 @@
 package com.yuyan.imemodule.keyboard
 
-import com.yuyan.imemodule.application.Launcher
 import com.yuyan.imemodule.keyboard.container.*
 import com.yuyan.imemodule.manager.InputModeSwitcherManager
 import com.yuyan.imemodule.prefs.AppPrefs
@@ -19,9 +18,17 @@ class KeyboardManager {
 
     // 兼容旧接口：设置根视图和输入视图
     fun setData(keyboardRootView: InputViewParent, inputView: InputView) {
+        if (!::mInputView.isInitialized || mInputView !== inputView) {
+            keyboards.clear()
+            currentContainer = null
+            KeyboardLoaderUtil.instance.clearKeyboardMap()
+        }
         mKeyboardRootView = keyboardRootView
         mInputView = inputView
     }
+
+    fun isBoundTo(inputView: InputView): Boolean =
+        ::mInputView.isInitialized && mInputView === inputView
 
     // 清空缓存键盘，并重建输入视图
     fun clearKeyboard() {
@@ -30,8 +37,16 @@ class KeyboardManager {
     }
 
     fun init(inputView: InputView, keyboardRootView: InputViewParent) {
-        mInputView = inputView
-        mKeyboardRootView = keyboardRootView
+        setData(keyboardRootView, inputView)
+    }
+
+    fun refreshWindowLayout() {
+        if (!::mCurrentKeyboardName.isInitialized) return
+        val keyboardName = mCurrentKeyboardName
+        KeyboardLoaderUtil.instance.clearKeyboardMap()
+        clearKeyboard()
+        switchKeyboard(keyboardName)
+        mInputView.updateCandidateBar()
     }
 
     fun switchKeyboard(layout: Int = InputModeSwitcherManager.skbLayout) {
@@ -53,17 +68,17 @@ class KeyboardManager {
         var container = keyboards[keyboardName]
         if (container == null) {
             container = when (keyboardName) {
-                KeyboardType.CANDIDATES ->  CandidatesContainer(Launcher.instance.context, mInputView)
-                KeyboardType.HANDWRITING -> HandwritingContainer(Launcher.instance.context, mInputView)
-                KeyboardType.NUMBER -> NumberContainer(Launcher.instance.context, mInputView)
-                KeyboardType.QWERTY -> QwertyContainer(Launcher.instance.context, mInputView, InputModeSwitcherManager.MASK_SKB_LAYOUT_QWERTY_PINYIN)
-                KeyboardType.SETTINGS -> SettingsContainer(Launcher.instance.context, mInputView)
-                KeyboardType.SYMBOL -> SymbolContainer(Launcher.instance.context, mInputView)
-                KeyboardType.QWERTYABC -> QwertyContainer(Launcher.instance.context, mInputView, InputModeSwitcherManager.MASK_SKB_LAYOUT_QWERTY_ABC)
-                KeyboardType.LX17 -> T9TextContainer(Launcher.instance.context, mInputView, InputModeSwitcherManager.MASK_SKB_LAYOUT_LX17)
-                KeyboardType.ClipBoard -> ClipBoardContainer(Launcher.instance.context, mInputView)
-                KeyboardType.TEXTEDIT -> QwertyContainer(Launcher.instance.context, mInputView, InputModeSwitcherManager.MASK_SKB_LAYOUT_TEXTEDIT)
-                else ->  T9TextContainer(Launcher.instance.context, mInputView, AppPrefs.getInstance().internal.inputDefaultMode.getValue() and InputModeSwitcherManager.MASK_SKB_LAYOUT)
+                KeyboardType.CANDIDATES ->  CandidatesContainer(mInputView.context, mInputView)
+                KeyboardType.HANDWRITING -> HandwritingContainer(mInputView.context, mInputView)
+                KeyboardType.NUMBER -> NumberContainer(mInputView.context, mInputView)
+                KeyboardType.QWERTY -> QwertyContainer(mInputView.context, mInputView, InputModeSwitcherManager.MASK_SKB_LAYOUT_QWERTY_PINYIN)
+                KeyboardType.SETTINGS -> SettingsContainer(mInputView.context, mInputView)
+                KeyboardType.SYMBOL -> SymbolContainer(mInputView.context, mInputView)
+                KeyboardType.QWERTYABC -> QwertyContainer(mInputView.context, mInputView, InputModeSwitcherManager.MASK_SKB_LAYOUT_QWERTY_ABC)
+                KeyboardType.LX17 -> T9TextContainer(mInputView.context, mInputView, InputModeSwitcherManager.MASK_SKB_LAYOUT_LX17)
+                KeyboardType.ClipBoard -> ClipBoardContainer(mInputView.context, mInputView)
+                KeyboardType.TEXTEDIT -> QwertyContainer(mInputView.context, mInputView, InputModeSwitcherManager.MASK_SKB_LAYOUT_TEXTEDIT)
+                else ->  T9TextContainer(mInputView.context, mInputView, AppPrefs.getInstance().internal.inputDefaultMode.getValue() and InputModeSwitcherManager.MASK_SKB_LAYOUT)
             }
             container.updateSkbLayout()
             keyboards[keyboardName] = container

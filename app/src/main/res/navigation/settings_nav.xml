@@ -76,9 +76,16 @@
         android:name="com.yuyan.imemodule.ui.fragment.AboutFragment"
         android:label="@string/about" >
         <action
+            android:id="@+id/action_aboutFragment_to_compatibilityNotesFragment"
+            app:destination="@id/compatibilityNotesFragment" />
+        <action
             android:id="@+id/action_aboutFragment_to_privacyPolicyFragment"
             app:destination="@id/privacyPolicyFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/compatibilityNotesFragment"
+        android:name="com.yuyan.imemodule.ui.fragment.CompatibilityNotesFragment"
+        android:label="@string/rp_duo_compatibility_notes" />
     <fragment
         android:id="@+id/privacyPolicyFragment"
         android:name="com.yuyan.imemodule.ui.fragment.PrivacyPolicyFragment"

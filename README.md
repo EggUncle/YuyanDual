@@ -4,27 +4,31 @@
 
 当前版本移除了语音识别、长按空格录音、录音授权页面和语音设置。短按及长按空格松手后仍执行普通空格操作。保留拼音、双拼、英文、手写和原有双屏键盘实现。
 
-应用使用独立包名 `io.github.egguncle.yuyandual.rpduo`（debug / release 分别追加对应后缀），可以与原版并存。
+应用使用兼容原生输入引擎的包名 `com.yuyan.pinyin.offline.debug` / `com.yuyan.pinyin.offline.release`，可与设备上的 `com.yuyan.pinyin.online.debug` 并存。不能与同包名的上游离线版并存；覆盖更新还需要签名一致。之前的自定义包名不被附带的预编译引擎接受，详见 [引擎兼容核查](validation/engine-compatibility.md)。
 
 ## 开发状态
 
-这是 RP Duo 适配的起点，并非已经完成实机验证的稳定版。上游按分辨率识别屏幕、下屏键盘高度和旋转行为仍需后续适配与实机验证。
+已从用户设备上的适配 APK 恢复显示器路由、零高度上屏占位、按下屏尺寸分配键盘与候选区、旋转重建、视图重新绑定和下屏字体调整。以实际显示器 ID 和状态选择键盘屏幕，尊重 Retroid 的固定键盘设置，不写死 RP Duo 的分辨率。实机验证记录会随验证结果更新；不承诺其他设备和固件已验证。
+
+输入法“关于”页可离线阅读 [适配与兼容说明](app/src/main/assets/docs/rp-duo-compatibility.html)，其中区分了来源版本与当前 fork 的验证范围。
 
 ## 构建
 
 使用 JDK 17、Android SDK 36，运行：
 
 ```sh
-./gradlew :app:assembleDualscreenDebug
+./gradlew :app:testDualscreenDebugUnitTest :app:assembleDualscreenDebug
 ```
 
-输出位于 `app/build/outputs/apk/dualscreen/debug/`。GitHub Actions 会验证资源完整性、构建测试版并上传 APK。无需语音模型、语音运行库或私有签名文件。
+输出位于 `app/build/outputs/apk/dualscreen/debug/`。GitHub Actions 会运行布局计算单元测试、验证资源完整性、构建测试版和输入探针并上传 APK。无需语音模型、语音运行库或私有签名文件。
 
 Rime 运行资源来源与完整性校验见 `resources/rime-manifest.json`；校验命令：
 
 ```sh
 python3 scripts/verify_resources.py
 ```
+
+测试用输入探针位于 `validation/probe`，可用 `./gradlew :imeprobe:assembleDebug` 单独构建；日常使用不需要安装探针。
 
 ## 上游说明与历史
 

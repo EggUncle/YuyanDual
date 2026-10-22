@@ -34,8 +34,8 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
         val heightRatioPrimaryPortrait = float("keyboard_height_ratio_primary_portrait", 0.45f)
         val heightRatioSecondaryPortrait = float("keyboard_height_ratio_secondary_portrait", 0.5f)
         val heightRatioSecondaryLandscape = float("keyboard_height_ratio_secondary_landscape", 0.5f)
-        // 全屏状态默认比例为 0.7；>0 则使用用户自定义比例
-        val heightRatioSecondaryFullscreen = float("keyboard_height_ratio_secondary_fullscreen", 0.7f)
+        // 全屏默认填满可用高度，候选栏和底部空间由尺寸计算统一预留
+        val heightRatioSecondaryFullscreen = float("keyboard_height_ratio_secondary_fullscreen", 1f)
         val keyboardModeFloat = bool("keyboard_mode_float", false)     // 悬浮模式
         val keyboardModeFloatLandscape = bool("keyboard_mode_float_landscape", false)// 悬浮模式:横屏
         val keyboardModeFloatFullscreen = bool("keyboard_mode_float_fullscreen", false)// 悬浮模式:副屏全屏

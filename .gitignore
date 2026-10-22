@@ -20,3 +20,5 @@ captures/
 *.jks
 *.keystore
 /keystore/
+
+/validation/probe/build/

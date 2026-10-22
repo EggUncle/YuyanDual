@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/probe_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/display_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Display / window bounds"
+        android:textSize="16sp" />
+    <TextView
+        android:id="@+id/focus_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Focus: none"
+        android:textSize="16sp" />
+    <TextView
+        android:id="@+id/action_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Editor actions: 0"
+        android:textSize="16sp" />
+
+    <ScrollView
+        android:id="@+id/content_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <EditText
+                android:id="@+id/plain_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:hint="Chinese / plain text"
+                android:inputType="text"
+                android:imeOptions="actionDone"
+                android:singleLine="true"
+                android:textSize="20sp" />
+            <TextView
+                android:id="@+id/plain_status"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="plain: length=0 text=[]"
+                android:textSize="16sp" />
+            <EditText
+                android:id="@+id/number_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:hint="Number"
+                android:inputType="number"
+                android:imeOptions="actionDone"
+                android:singleLine="true"
+                android:textSize="20sp" />
+            <TextView
+                android:id="@+id/number_status"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="number: length=0 text=[]"
+                android:textSize="16sp" />
+            <EditText
+                android:id="@+id/password_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:hint="Test password (temporary)"
+                android:inputType="textPassword"
+                android:imeOptions="actionDone"
+                android:singleLine="true"
+                android:saveEnabled="false"
+                android:textSize="20sp" />
+            <TextView
+                android:id="@+id/password_status"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="password: length=0"
+                android:textSize="16sp" />
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/reset_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Reset" />
+        <Button
+            android:id="@+id/hide_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Hide keyboard" />
+    </LinearLayout>
+</LinearLayout>
