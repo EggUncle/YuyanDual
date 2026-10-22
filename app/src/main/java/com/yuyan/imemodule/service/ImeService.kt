@@ -32,7 +32,6 @@ import com.yuyan.imemodule.keyboard.container.T9TextContainer
 import com.yuyan.imemodule.keyboard.container.HandwritingContainer
 import com.yuyan.imemodule.keyboard.TextKeyboard
 import android.content.res.Configuration
-import kotlinx.coroutines.*
 import com.yuyan.imemodule.utils.KeyboardLoaderUtil
 import com.yuyan.imemodule.data.theme.ThemeManager.OnThemeChangeListener
 import com.yuyan.imemodule.prefs.AppPrefs.Companion.getInstance
@@ -41,10 +40,6 @@ import android.util.TypedValue
 import android.graphics.Color
 import android.view.Gravity
 import android.content.Context
-import android.content.Intent
-import android.content.BroadcastReceiver
-import android.content.IntentFilter
-import com.yuyan.imemodule.voice.VoiceRecognitionManager
 
 class ImeService : InputMethodService() {
     private var isWindowShown = false // 键盘窗口是否已显示
@@ -60,16 +55,6 @@ class ImeService : InputMethodService() {
 
     private var lastDisplayState: EnvironmentSingleton.DisplayState? = null
     
-    // 权限请求结果广播接收器
-    private val permissionResultReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            if (intent?.action == "com.yuyan.imemodule.PERMISSION_RESULT") {
-                val granted = intent.getBooleanExtra("granted", false)
-                handlePermissionResult(granted)
-            }
-        }
-    }
-
     private val displayListener = object : DisplayManager.DisplayListener {
         override fun onDisplayAdded(displayId: Int) {
             // Log.d(logTag, "displayListener onDisplayAdded id=$displayId") // 调试标签已隐藏
@@ -522,136 +507,23 @@ class ImeService : InputMethodService() {
         }
     }
     
-    /**
-     * 初始化语音识别
-     */
-    private fun initializeVoiceRecognition() {
-        try {
-            // 在后台线程初始化语音识别
-            GlobalScope.launch(Dispatchers.IO) {
-                VoiceRecognitionManager.initialize()
-            }
-        } catch (e: Exception) {
-            Log.e("ImeService", "Failed to initialize voice recognition", e)
-        }
-    }
-    
-    /**
-     * 权限请求回调接口
-     */
-    interface PermissionCallback {
-        fun onPermissionGranted()
-        fun onPermissionDenied()
-        fun onPermissionPermanentlyDenied()
-    }
-    
-    private var currentPermissionCallback: PermissionCallback? = null
-    
-    /**
-     * 请求语音识别权限
-     * @param callback 权限请求结果回调
-     */
-    fun requestVoiceRecognitionPermissions(callback: PermissionCallback? = null) {
-        currentPermissionCallback = callback
-        
-        try {
-            // 标记权限已被请求过（用于区分首次请求和永久拒绝）
-            com.yuyan.imemodule.permission.PermissionManager.markPermissionAsRequested(this)
-            
-            // 获取缺失的权限
-            val missingPermissions = com.yuyan.imemodule.permission.PermissionManager.getMissingPermissions()
-            
-            if (missingPermissions.isNotEmpty()) {
-                // 由于 InputMethodService 不是 Activity，我们需要通过特殊方式处理权限请求
-                // 这里使用启动一个透明 Activity 的方式来处理权限请求
-                try {
-                    val intent = android.content.Intent().apply {
-                        setClass(this@ImeService, Class.forName("com.yuyan.imemodule.ui.activity.PermissionRequestActivity"))
-                        addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-                        putExtra("permissions", missingPermissions)
-                    }
-                    startActivity(intent)
-                } catch (e: ClassNotFoundException) {
-                    Log.e("ImeService", "PermissionRequestActivity not found", e)
-                    callback?.onPermissionDenied()
-                }
-            } else {
-                // 权限已授予
-                callback?.onPermissionGranted()
-            }
-        } catch (e: Exception) {
-            Log.e("ImeService", "Error requesting permissions", e)
-            callback?.onPermissionDenied()
-        }
-    }
-    
-    /**
-     * 处理权限请求结果（由 PermissionRequestActivity 调用）
-     */
-    fun handlePermissionResult(granted: Boolean) {
-        val callback = currentPermissionCallback
-        currentPermissionCallback = null
-        
-        if (granted) {
-            callback?.onPermissionGranted()
-        } else {
-            // 判断是否是永久拒绝
-            val status = com.yuyan.imemodule.permission.PermissionManager.getVoiceRecognitionPermissionStatus(this)
-            if (status == com.yuyan.imemodule.permission.PermissionManager.PermissionStatus.PERMANENTLY_DENIED) {
-                callback?.onPermissionPermanentlyDenied()
-            } else {
-                callback?.onPermissionDenied()
-            }
-        }
-    }
-
-    /**
-     * 获取当前服务实例（供语音识别使用）
-     */
-    companion object {
-        @Volatile
-        private var currentInstance: ImeService? = null
-        
-        fun getCurrentInstance(): ImeService? = currentInstance
-    }
-    
     override fun onCreate() {
         super.onCreate()
-        currentInstance = this
         
         displayManager = getSystemService(DisplayManager::class.java)
         displayManager?.registerDisplayListener(displayListener, null)
         ThemeManager.addOnChangedListener(onThemeChangeListener)
         clipboardUpdateContent.registerOnChangeListener(clipboardUpdateContentListener)
         
-        // 注册权限请求结果广播接收器
-        registerReceiver(permissionResultReceiver, IntentFilter("com.yuyan.imemodule.PERMISSION_RESULT"))
-        
-        // 初始化语音识别
-        initializeVoiceRecognition()
     }
     
     override fun onDestroy() {
         super.onDestroy()
-        currentInstance = null
-        
-        // 销毁语音识别
-        try {
-            VoiceRecognitionManager.destroy()
-        } catch (e: Exception) {
-            Log.e("ImeService", "Failed to destroy voice recognition", e)
-        }
         
         // 取消显示监听器
         displayManager?.unregisterDisplayListener(displayListener)
         ThemeManager.removeOnChangedListener(onThemeChangeListener)
         clipboardUpdateContent.unregisterOnChangeListener(clipboardUpdateContentListener)
         
-        // 注销权限请求结果广播接收器
-        try {
-            unregisterReceiver(permissionResultReceiver)
-        } catch (e: Exception) {
-            Log.e("ImeService", "Failed to unregister permission receiver", e)
-        }
     }
 }

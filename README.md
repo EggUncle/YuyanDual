@@ -1,3 +1,33 @@
+# 语燕 RP Duo
+
+面向 RP Duo 的开发分支，基于 [YuyanDual](https://github.com/Maditer/YuyanDual)。
+
+当前版本移除了语音识别、长按空格录音、录音授权页面和语音设置。短按及长按空格松手后仍执行普通空格操作。保留拼音、双拼、英文、手写和原有双屏键盘实现。
+
+应用使用独立包名 `io.github.egguncle.yuyandual.rpduo`（debug / release 分别追加对应后缀），可以与原版并存。
+
+## 开发状态
+
+这是 RP Duo 适配的起点，并非已经完成实机验证的稳定版。上游按分辨率识别屏幕、下屏键盘高度和旋转行为仍需后续适配与实机验证。
+
+## 构建
+
+使用 JDK 17、Android SDK 36，运行：
+
+```sh
+./gradlew :app:assembleDualscreenDebug
+```
+
+输出位于 `app/build/outputs/apk/dualscreen/debug/`。GitHub Actions 会验证资源完整性、构建测试版并上传 APK。无需语音模型、语音运行库或私有签名文件。
+
+Rime 运行资源来源与完整性校验见 `resources/rime-manifest.json`；校验命令：
+
+```sh
+python3 scripts/verify_resources.py
+```
+
+## 上游说明与历史
+
 # 语燕输入法双屏版
 1. [语燕双屏版](https://github.com/Maditer/YuyanDual)以[语燕输入法](https://github.com/gurecn/YuyanIme)为基础，增加了对双屏安卓设备（目前只有 AYN Thor）的支持，并对一些功能做了个性化调整
 2. 如果使用当中遇到问题，欢迎提交反馈，但我不保证能解决所有问题，因为我一行代码也不会写，全是 AI 写的 ^_^

@@ -1,0 +1,111 @@
+{
+  "repository": "https://github.com/gurecn/yuyansdk",
+  "commit": "ab7568dfa0f60989856b9763a3efef65e8b10d18",
+  "license": "GPL-3.0 (see LICENSE)",
+  "files": [
+    {
+      "path": "app/src/main/assets/rime/build/default.yaml",
+      "git_blob_sha1": "38b866dfbe99c04f6cd9ac2c30fd3104e0f15db2"
+    },
+    {
+      "path": "app/src/main/assets/rime/build/double_pinyin_abc.prism.bin",
+      "git_blob_sha1": "046ff3d77a07419726ed7c60c18698ad271fe901"
+    },
+    {
+      "path": "app/src/main/assets/rime/build/double_pinyin_abc.schema.yaml",
+      "git_blob_sha1": "dbfaf33342deed54fb53e61a8cdeca34b1037f24"
+    },
+    {
+      "path": "app/src/main/assets/rime/build/double_pinyin_flypy.prism.bin",
+      "git_blob_sha1": "aad77ed998330b16bdbab1b90b1b23d1b60c0a4a"
+    },
+    {
+      "path": "app/src/main/assets/rime/build/double_pinyin_flypy.schema.yaml",
+      "git_blob_sha1": "dbf765be1fd88df75e64a53f8380f9567fda5ed5"
+    },
+    {
+      "path": "app/src/main/assets/rime/build/double_pinyin_ls17.prism.bin",
+      "git_blob_sha1": "861b156eaf859114825f61b5190700cc37361b6f"
+    },
+    {
+      "path": "app/src/main/assets/rime/build/double_pinyin_ls17.schema.yaml",
+      "git_blob_sha1": "e17fff00220c81704a2014486e88ec3cb786c373"
+    },
+    {
+      "path": "app/src/main/assets/rime/build/double_pinyin_mspy.prism.bin",
+      "git_blob_sha1": "c6e2aabad1f5f91f54c1d780705065aea4b57a30"
+    },
+    {
+      "path": "app/src/main/assets/rime/build/double_pinyin_mspy.schema.yaml",
+      "git_blob_sha1": "0eb0de56bf6579725561e08e625305dda1176d18"
+    },
+    {
+      "path": "app/src/main/assets/rime/build/double_pinyin_natural.prism.bin",
+      "git_blob_sha1": "5b58af50c7d2ba142325e782c714b7daa909c00c"
+    },
+    {
+      "path": "app/src/main/assets/rime/build/double_pinyin_natural.schema.yaml",
+      "git_blob_sha1": "b46118be5aedab3a5a6cbd18e7d8d811a55e8b07"
+    },
+    {
+      "path": "app/src/main/assets/rime/build/double_pinyin_sogou.prism.bin",
+      "git_blob_sha1": "b82e32ee1b482696e48d791873bfbc2bcd2cf4ac"
+    },
+    {
+      "path": "app/src/main/assets/rime/build/double_pinyin_sogou.schema.yaml",
+      "git_blob_sha1": "5691dabca0dadfd2b8f172aa0d9db6034283fc49"
+    },
+    {
+      "path": "app/src/main/assets/rime/build/double_pinyin_ziguang.prism.bin",
+      "git_blob_sha1": "71f743f07275a497561c12b279967e5becb7200d"
+    },
+    {
+      "path": "app/src/main/assets/rime/build/double_pinyin_ziguang.schema.yaml",
+      "git_blob_sha1": "2a00347519ec0da7a161bd19983de746ebad8dd4"
+    },
+    {
+      "path": "app/src/main/assets/rime/build/english.prism.bin",
+      "git_blob_sha1": "4790714e23ab0c481a8f3874b6114beb76a77178"
+    },
+    {
+      "path": "app/src/main/assets/rime/build/english.schema.yaml",
+      "git_blob_sha1": "0a5c958eddaa9faa2f9a449ffd50d524683b6d4e"
+    },
+    {
+      "path": "app/src/main/assets/rime/build/english.table.bin",
+      "git_blob_sha1": "846af98eb59c5629704002c862eaee6a74729174"
+    },
+    {
+      "path": "app/src/main/assets/rime/build/pinyin.prism.bin",
+      "git_blob_sha1": "4fc7e63b7e640d6f7ac6860904d415d764a16b15"
+    },
+    {
+      "path": "app/src/main/assets/rime/build/pinyin.schema.yaml",
+      "git_blob_sha1": "2a7f251340f6c7c14ed8ed49c9f649acc0a31837"
+    },
+    {
+      "path": "app/src/main/assets/rime/build/pinyin.table.bin",
+      "git_blob_sha1": "2545430f5db037fc1573bf98f23b57750e501da1"
+    },
+    {
+      "path": "app/src/main/assets/rime/build/stroke.prism.bin",
+      "git_blob_sha1": "b92d81310e3d1c132ef293821e42299c60bb2f4c"
+    },
+    {
+      "path": "app/src/main/assets/rime/build/stroke.schema.yaml",
+      "git_blob_sha1": "bb2d3bb67b431051677848b28e1e5925356b2d2e"
+    },
+    {
+      "path": "app/src/main/assets/rime/build/stroke.table.bin",
+      "git_blob_sha1": "1ab89e481ed5f4c97c484d8c2002e4fce632390d"
+    },
+    {
+      "path": "app/src/main/assets/rime/build/t9_pinyin.prism.bin",
+      "git_blob_sha1": "bdebf64652c94d9618dc78d18b926bf04fa42e7b"
+    },
+    {
+      "path": "app/src/main/assets/rime/build/t9_pinyin.schema.yaml",
+      "git_blob_sha1": "119ae81df9919ab5e2ca25dd97d243628de3e943"
+    }
+  ]
+}

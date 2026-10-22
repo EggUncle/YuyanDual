@@ -15,7 +15,7 @@ android {
     compileSdk 36
     namespace 'com.yuyan.imemodule'
     defaultConfig {
-        applicationId "com.yuyan.pinyin"
+        applicationId "io.github.egguncle.yuyandual.rpduo"
         minSdk 23
         targetSdk 36
         versionCode Integer.valueOf(versionCodeDate())
@@ -72,7 +72,6 @@ android {
     productFlavors {
         dualscreen {
             dimension "default"
-            applicationIdSuffix  ".online"
             buildConfigField "Boolean", "offline", "false"
             resValue("drawable", "app_icon", "@drawable/ic_sdk_launcher")
         }

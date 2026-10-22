@@ -11,7 +11,7 @@
 *.class
 
 # Generated files
-build/
+/build/
 generated/
 
 # Local configuration file (sdk path, etc)
@@ -72,8 +72,7 @@ tmp/
 captures/
 .gradle/
 
-# Ignore Rime build files
-src/main/assets/rime/build/
+# Rime assets/rime/build is versioned runtime data.
 
 # Ignore local keystore properties
 ../keystore/keystore.properties
