@@ -196,7 +196,7 @@ class ImeService : InputMethodService() {
     override fun onStartInputView(editorInfo: EditorInfo, restarting: Boolean) {
         super.onStartInputView(editorInfo, restarting)
         inputViewStarted = true
-        YuyanEmojiCompat.editorInfo = editorInfo
+        YuyanEmojiCompat.setEditorInfo(editorInfo)
         bindKeyboard(editorInfo, restarting)
     }
 
